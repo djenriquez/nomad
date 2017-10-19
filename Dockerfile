@@ -28,15 +28,21 @@ RUN set -x && \
     apk del .gosu-deps
 
 ENV NOMAD_VERSION 0.7.0-beta1
-ENV NOMAD_SHA256 174794d96d2617252875e2e2ff9e496120acc4a97be54965c324b9a5d11b37ab
 
-ADD https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_amd64.zip /tmp/nomad.zip
-RUN echo "${NOMAD_SHA256}  /tmp/nomad.zip" > /tmp/nomad.sha256 \
-  && sha256sum -c /tmp/nomad.sha256 \
-  && cd /bin \
-  && unzip /tmp/nomad.zip \
+RUN set -x \
+  && apk --update add --no-cache --virtual .nomad-deps gnupg curl \
+  && cd /tmp \
+  && curl -L -o nomad_${NOMAD_VERSION}_linux_amd64.zip https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_amd64.zip \
+  && curl -L -o nomad_${NOMAD_VERSION}_SHA256SUMS      https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_SHA256SUMS \
+  && curl -L -o nomad_${NOMAD_VERSION}_SHA256SUMS.sig  https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_SHA256SUMS.sig \
+  && export GNUPGHOME="$(mktemp -d)" \
+  && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys 91A6E7F85D05C65630BEF18951852D87348FFC4C \
+  && gpg --batch --verify nomad_${NOMAD_VERSION}_SHA256SUMS.sig nomad_${NOMAD_VERSION}_SHA256SUMS \
+  && grep nomad_${NOMAD_VERSION}_linux_amd64.zip nomad_${NOMAD_VERSION}_SHA256SUMS | sha256sum -c \
+  && unzip -d /bin nomad_${NOMAD_VERSION}_linux_amd64.zip \
   && chmod +x /bin/nomad \
-  && rm /tmp/nomad.zip
+  && rm -r "$GNUPGHOME" nomad_${NOMAD_VERSION}_linux_amd64.zip nomad_${NOMAD_VERSION}_SHA256SUMS nomad_${NOMAD_VERSION}_SHA256SUMS.sig \
+  && apk del .nomad-deps
 
 RUN mkdir -p /nomad/data && \
     mkdir -p /etc/nomad && \
