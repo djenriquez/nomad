@@ -30,7 +30,7 @@ RUN set -x && \
 ENV NOMAD_VERSION 0.7.1
 
 RUN set -x \
-  && apk --update add --no-cache --virtual .nomad-deps gnupg curl \
+  && apk --update add --no-cache --virtual .nomad-deps gnupg curl ca-alternatives \
   && cd /tmp \
   && curl -L -o nomad_${NOMAD_VERSION}_linux_amd64.zip https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_linux_amd64.zip \
   && curl -L -o nomad_${NOMAD_VERSION}_SHA256SUMS      https://releases.hashicorp.com/nomad/${NOMAD_VERSION}/nomad_${NOMAD_VERSION}_SHA256SUMS \
