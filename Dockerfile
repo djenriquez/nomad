@@ -11,6 +11,7 @@ ENV DUMB_INIT_VERSION 1.2.0
 
 RUN set -x && \
     apk --update add --no-cache --virtual .gosu-deps dpkg curl gnupg && \
+    apk add --no-cache ca-certificates && \
     curl -L -o /tmp/glibc-${GLIBC_VERSION}.apk https://github.com/andyshinn/alpine-pkg-glibc/releases/download/${GLIBC_VERSION}/glibc-${GLIBC_VERSION}.apk && \
     apk add --allow-untrusted /tmp/glibc-${GLIBC_VERSION}.apk && \
     rm -rf /tmp/glibc-${GLIBC_VERSION}.apk /var/cache/apk/* && \
